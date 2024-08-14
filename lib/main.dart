@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kairos/screens/widgets/noteScreen.dart';
 import 'package:table_calendar/table_calendar.dart';
 void main() => runApp(MyApp());
 
@@ -6,7 +7,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: CalendarScreen(),
+      home:SafeArea(child: CalendarScreen(),
+      ),
+      debugShowCheckedModeBanner: false,
+
     );
   }
 }
@@ -24,7 +28,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Lịch')),
+      appBar: AppBar(
+          title: Text('Lịch'),
+          actions: [
+                IconButton(icon: Icon(Icons.menu),
+                  onPressed:(){
+                  Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => noteScreen()),
+                  );
+              },
+            ),
+
+          ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
