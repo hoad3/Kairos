@@ -33,7 +33,7 @@ class _noteScreenState extends State<noteScreen> {
       ),
       body: ListView.builder(itemCount: notes.length,
       itemBuilder: (context, index){
-        return NoteCard(note: notes[index], index: index, onDeleteNote:onDeleteNote);
+        return NoteCard(note: notes[index], index: index, onDeleteNote:onDeleteNote, onEditnote: onEditNoteUpdated,);
       },
       ),
       floatingActionButton: FloatingActionButton(onPressed: (){
@@ -43,16 +43,14 @@ class _noteScreenState extends State<noteScreen> {
       ),
 
     );
-
-
   }
-
+//lưu lại note khi thoát ứng dụng
   Future<void> saveNotes() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notesJson = notes.map((note) => jsonEncode(note.toJson())).toList();
     await prefs.setStringList('notes', notesJson);
   }
-
+//tạo note
   void onNewNoteCreated(Note note){
     notes.add(note);
     saveNotes();
@@ -60,12 +58,20 @@ class _noteScreenState extends State<noteScreen> {
 
     });
   }
+  //xóa note
   void onDeleteNote(int index){
     notes.removeAt(index);
     saveNotes();
     setState(() {
 
     });
+  }
+
+  //sửa note
+  void onEditNoteUpdated(Note updatedNote, int index) {
+    notes[index] = updatedNote;
+    saveNotes();
+    setState(() {});
   }
 
   @override

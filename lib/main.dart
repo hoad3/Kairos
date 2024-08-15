@@ -31,7 +31,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       appBar: AppBar(
           title: Text('Lịch'),
           actions: [
-                IconButton(icon: Icon(Icons.menu),
+                IconButton(icon: Icon(Icons.note),
                   onPressed:(){
                   Navigator.push(context,
                   MaterialPageRoute(builder: (context) => noteScreen()),

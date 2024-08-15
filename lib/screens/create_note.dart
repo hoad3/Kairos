@@ -4,13 +4,19 @@ import 'package:kairos/models/note_models.dart';
 import 'package:kairos/screens/widgets/noteScreen.dart';
 
 class createNote extends StatefulWidget {
-  const createNote({super.key, required this.onNewNoteCreated});
+  const createNote(
+      {super.key, required this.onNewNoteCreated, this.note, this.index});
+
+  // final Function(Note)? onNoteUpdated;
+  final Note? note;
+  final int? index;
 
   final Function(Note) onNewNoteCreated;
 
-  @override
-  State<createNote> createState() => _createNoteState();
-}
+
+    @override
+    State<createNote> createState() => _createNoteState();
+  }
 
 class _createNoteState extends State<createNote> {
 
@@ -18,10 +24,27 @@ class _createNoteState extends State<createNote> {
   final bodyController = TextEditingController();
 
   @override
+  void dispose() {
+    titleController.dispose();
+    bodyController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.note != null) {
+      titleController.text = widget.note!.title;
+      bodyController.text = widget.note!.body;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("New note"),
+        title: Text(widget.note == null ? "Create note" : "Edit note"),
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -54,25 +77,27 @@ class _createNoteState extends State<createNote> {
       floatingActionButton: FloatingActionButton(onPressed: (){
 
         if(titleController.text.isEmpty)
-          {
-            return;
-          }
-        if(bodyController.text.isEmpty){
-          return;
-        }
-        final note = Note(
-          body: bodyController.text,
-          title: titleController.text
-        );
+                {
+                  return;
+                }
+              if(bodyController.text.isEmpty){
+                return;
+              }
+              final note = Note(
+                body: bodyController.text,
+                title: titleController.text
+              );
 
-        widget.onNewNoteCreated(note);
-        Navigator.of(context).pop();
+              widget.onNewNoteCreated(note);
+              Navigator.of(context).pop();
 
-      },
+            },
 
-          child: const Icon(Icons.save),
+                child: const Icon(Icons.save),
+
+
+
       ),
-
     );
   }
 }

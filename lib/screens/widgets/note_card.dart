@@ -1,47 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:kairos/models/note_models.dart';
+import 'package:kairos/screens/create_note.dart';
 import 'package:kairos/screens/widgets/note_view.dart';
 
 class NoteCard extends StatelessWidget {
-  const NoteCard({super.key, required this.note, required this.index, required this.onDeleteNote});
+  const NoteCard({super.key, required this.note, required this.index, required this.onDeleteNote, required this.onEditnote});
 
   final Note note;
   final int index;
 
   final Function(int) onDeleteNote;
+  final Function(Note, int) onEditnote;
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: (){
-        Navigator.of(context).push(MaterialPageRoute(builder:(context) =>NoteView(note: note, index: index, onDeleteNote: onDeleteNote,)));
-      },
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    Widget build(BuildContext context) {
+      return Card(
+        child: ListTile(
+          title: Text(note.title),
+          subtitle: Text(note.body),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                note.title,
-                style: const TextStyle(
-                  fontSize: 20,
-                ),
+              IconButton(onPressed: (){
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => createNote(
+                      note: note,
+                      index: index,
+                      onNewNoteCreated: (updatedNote) => onEditnote(updatedNote, index),
+                    )));
+              }, icon: Icon(Icons.edit)
+              
               ),
-      
-              const SizedBox(height:  10),
-      
-              Text(
-                note.body,
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              IconButton(onPressed: () => onDeleteNote(index),
+                  icon: Icon(Icons.delete))
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
+
