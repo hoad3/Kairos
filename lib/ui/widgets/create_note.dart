@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kairos/models/note_models.dart';
 import 'package:kairos/models/note_models.dart';
-import 'package:kairos/screens/widgets/noteScreen.dart';
+import 'package:kairos/ui/widgets/noteScreen.dart';
 
 class createNote extends StatefulWidget {
   const createNote(

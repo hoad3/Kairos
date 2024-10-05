@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kairos/models/note_models.dart';
-import 'package:kairos/screens/create_note.dart';
-import 'package:kairos/screens/widgets/note_view.dart';
+import 'package:kairos/ui/widgets/create_note.dart';
+import 'package:kairos/View/Note/note_view.dart';
 
 class NoteCard extends StatelessWidget {
   const NoteCard({super.key, required this.note, required this.index, required this.onDeleteNote, required this.onEditnote});

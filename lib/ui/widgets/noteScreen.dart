@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:kairos/models/note_models.dart';
-import 'package:kairos/screens/create_note.dart';
-import 'package:kairos/screens/widgets/note_card.dart';
+import 'package:kairos/ui/widgets/create_note.dart';
+import 'package:kairos/ui/widgets/note_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
