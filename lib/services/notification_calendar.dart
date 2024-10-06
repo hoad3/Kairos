@@ -1,11 +1,10 @@
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:get/get.dart';
+import 'package:kairos/models/event.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io'; // Để kiểm tra nền tảng
-
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 class NotificationHelper{
 
   static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
@@ -13,6 +12,9 @@ class NotificationHelper{
 
 
   static Future init()async{
+    _configureLocalTimezone();
+    requestAndroidPermissions();
+
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -44,8 +46,60 @@ static Future showsimplenotification({
   const NotificationDetails notificationDetails =
   NotificationDetails(android: androidNotificationDetails);
   await _flutterLocalNotificationsPlugin.show(
-      0, 'plain title', 'plain body', notificationDetails,
-      payload: 'item x');
+      0,
+      title,
+      body,
+      const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'your_channel_id', // ID của kênh
+        'your_channel_name', // Tên của kênh
+        channelDescription: 'your_channel_description', // Mô tả
+        importance: Importance.high, // Mức độ quan trọng
+      ),
+    ),
+      // payload: 'Default_Sound',
+  );
+}
+scheduledNotification(int hour, int minutes, Event event) async{
+  try {
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      event.id!.toInt(),
+      event.title,
+      event.note,
+      _convertTime(hour, minutes),
+      const NotificationDetails(
+          android: AndroidNotificationDetails(
+              'your channel id', 'your channel name',
+              channelDescription: 'your channel description')),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+    print('thong bao cho nguoi dung');
+  } catch (e) {
+    print('Lỗi khi gửi thông báo: $e');
+  }
+
+}
+tz.TZDateTime _convertTime(int hour, int minutes)
+{
+  final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+  tz.TZDateTime scheduleDate =
+      tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minutes);
+
+  if(scheduleDate.isBefore(now))
+    {
+      scheduleDate = scheduleDate.add(const Duration(days:1));
+    }
+
+  return scheduleDate;
+}
+
+static Future<void> _configureLocalTimezone() async{
+    tz.initializeTimeZones();
+    final String timezone = await tz.local.name;
+    tz.setLocalLocation(tz.getLocation(timezone));
 }
   static Future<void> requestAndroidPermissions() async {
     if (Platform.isAndroid) {
@@ -63,110 +117,4 @@ static Future showsimplenotification({
     }
   }
 
-  //   FlutterLocalNotificationsPlugin
-//   flutterLocalNotificationsPlugin =
-//   FlutterLocalNotificationsPlugin(); //
-//
-//   initializeNotification() async {
-//     // Cấu hình cho iOS
-//     final DarwinInitializationSettings initializationSettingsIOS =
-//     DarwinInitializationSettings(
-//         requestSoundPermission: false,
-//         requestBadgePermission: false,
-//         requestAlertPermission: false,
-//         onDidReceiveLocalNotification: onDidReceiveLocalNotification
-//     );
-//
-//     // Cấu hình cho Android
-//     final AndroidInitializationSettings initializationSettingsAndroid =
-//     AndroidInitializationSettings("appicon");
-//
-//     // Cấu hình chung
-//     final InitializationSettings initializationSettings =
-//     InitializationSettings(
-//       iOS: initializationSettingsIOS,
-//       android: initializationSettingsAndroid,
-//     );
-//
-//     // Khởi tạo thông báo cục bộ với hàm callback `onSelectNotification`
-//     await flutterLocalNotificationsPlugin.initialize(
-//       initializationSettings,
-//       onDidReceiveNotificationResponse: selectNotification, // Callback cho cả Android và iOS
-//     );
-//   }
-//
-// // Hàm callback được gọi khi người dùng nhấn vào thông báo (Android và iOS)
-//   Future selectNotification(NotificationResponse notificationResponse) async {
-//     if (notificationResponse.payload != null) {
-//       print('Thông báo có payload: ${notificationResponse.payload}');
-//       // Thực hiện hành động khi người dùng nhấn vào thông báo
-//     } else {
-//       print('Không có payload');
-//     }
-//     Get.to(() => Container(color: Colors.white,));
-//   }
-//
-// // Hàm này chỉ dành cho iOS, không dùng trên Android
-//   Future onDidReceiveLocalNotification(
-//       int id, String? title, String? body, String? payload) async {
-//     // Xử lý khi nhận thông báo trên iOS khi ứng dụng đang ở foreground
-//     print("Nhận thông báo trên iOS: $title");
-//   }
-//
-//   void requestAndroidPermissions() async {
-//     if (Platform.isAndroid) {
-//       print("Quyền thông báo không được cấp.");
-//       // Kiểm tra nếu phiên bản Android >= 13 (API 33)
-//       if (await _isAndroid13OrAbove()) {
-//         var status = await Permission.notification.status;
-//         if (!status.isGranted) {
-//           // Nếu quyền chưa được cấp, yêu cầu quyền từ người dùng
-//           PermissionStatus permissionStatus = await Permission.notification.request();
-//           if (permissionStatus.isGranted) {
-//             print("Quyền thông báo đã được cấp.");
-//           } else {
-//             print("Quyền thông báo bị từ chối.");
-//           }
-//         } else {
-//           print("Quyền thông báo đã được cấp trước đó.");
-//         }
-//       } else {
-//         // Nếu Android dưới 13, quyền thông báo mặc định được cấp
-//         print("Không cần yêu cầu quyền thông báo cho Android dưới phiên bản 13.");
-//       }
-//     }
-//   }
-//
-//   Future<bool> _isAndroid13OrAbove() async {
-//     // Kiểm tra phiên bản Android
-//     int sdkInt = await _getSdkInt();
-//     return sdkInt >= 33; // API 33 tương ứng với Android 13
-//   }
-//
-//   Future<int> _getSdkInt() async {
-//     // Sử dụng `platform_channel` để lấy thông tin SDK nếu cần
-//     return int.parse(Platform.operatingSystemVersion.split(" ")[1].split("-")[0]);
-//   }
-//
-//   void showNotification() async {
-//     print('da chay ham nay ');
-//     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-//       'your_channel_id', // ID kênh thông báo
-//       'your_channel_name', // Tên kênh
-//       //'your_channel_description', // Mô tả kênh
-//       importance: Importance.max,
-//       priority: Priority.high,
-//       showWhen: false,
-//     );
-//     print('da chay ham nay ');
-//     var platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-//     print('da chay ham nay ');
-//     await flutterLocalNotificationsPlugin.show(
-//       0, // ID thông báo
-//       'Tiêu đề thông báo', // Tiêu đề thông báo
-//       'Nội dung thông báo', // Nội dung thông báo
-//       platformChannelSpecifics,
-//       payload: 'Thông tin thêm nếu cần', // Payload để xử lý khi nhấn vào thông báo
-//     );
-//   }
 }

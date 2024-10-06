@@ -63,12 +63,12 @@ class _createNoteState extends State<createNote> {
             const SizedBox(height: 10,),
             TextFormField(
               controller: bodyController,
-              style: const TextStyle(
-                  fontSize: 16
-              ),
-              decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Your decription"
+              style: const TextStyle(fontSize: 16),
+              keyboardType: TextInputType.multiline, // Cho phép nhập nhiều dòng
+              maxLines: null, // Cho phép số dòng không giới hạn
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: "Your description",
               ),
             ),
           ],
@@ -92,11 +92,7 @@ class _createNoteState extends State<createNote> {
               Navigator.of(context).pop();
 
             },
-
                 child: const Icon(Icons.save),
-
-
-
       ),
     );
   }

@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:kairos/Controller/event_controller.dart';
+import 'package:kairos/models/event.dart';
 import 'package:kairos/ui/Calendar/themes.dart';
-import 'package:kairos/ui/widgets/button_create.dart';
 import 'package:kairos/ui/widgets/button_create_1.dart';
 import 'package:kairos/ui/widgets/input_field_event.dart';
 
@@ -15,6 +16,7 @@ class AddTaskBar extends StatefulWidget {
 }
 
 class _AddTaskBarState extends State<AddTaskBar> {
+  final EventController _eventController = Get.put(EventController());
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
@@ -68,7 +70,7 @@ class _AddTaskBarState extends State<AddTaskBar> {
                             )),
                     ),
                   ),
-                  SizedBox(width: 12,),
+                  const SizedBox(width: 12,),
                   Expanded(
                     child: InputFieldEvent(
                       title: "End Time",
@@ -109,29 +111,29 @@ class _AddTaskBarState extends State<AddTaskBar> {
                   },
                 ),
               ),
-              InputFieldEvent(
-                title: "Repeat",
-                hint: "$_selectedRepeat",
-                widget: DropdownButton<String>(
-                  value: _selectedRepeat, // Đặt giá trị hiện tại
-                  icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                  iconSize: 32,
-                  elevation: 4,
-                  style: dropDownStyle,
-                  underline: Container(),
-                  items: selectedRepeat.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value.toString(), style: TextStyle(color: Colors.grey),),
-                    );
-                  }).toList(), // Chuyển đổi danh sách thành List<DropdownMenuItem<String>>
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedRepeat = newValue!; // Cập nhật giá trị khi người dùng chọn
-                    });
-                  },
-                ),
-              ),
+              // InputFieldEvent(
+              //   title: "Repeat",
+              //   hint: "$_selectedRepeat",
+              //   widget: DropdownButton<String>(
+              //     value: _selectedRepeat, // Đặt giá trị hiện tại
+              //     icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+              //     iconSize: 32,
+              //     elevation: 4,
+              //     style: dropDownStyle,
+              //     underline: Container(),
+              //     items: selectedRepeat.map<DropdownMenuItem<String>>((String value) {
+              //       return DropdownMenuItem<String>(
+              //         value: value,
+              //         child: Text(value.toString(), style: TextStyle(color: Colors.grey),),
+              //       );
+              //     }).toList(), // Chuyển đổi danh sách thành List<DropdownMenuItem<String>>
+              //     onChanged: (String? newValue) {
+              //       setState(() {
+              //         _selectedRepeat = newValue!; // Cập nhật giá trị khi người dùng chọn
+              //       });
+              //     },
+              //   ),
+              // ),
               SizedBox(height: 18,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -152,6 +154,7 @@ class _AddTaskBarState extends State<AddTaskBar> {
   _validateDate(){
     if(_titleController.text.isNotEmpty&&_noteController.text.isNotEmpty)
       {
+        _addEventToDb();
         Get.back();
       }else if(_titleController.text.isEmpty||_noteController.text.isEmpty)
         {
@@ -165,6 +168,23 @@ class _AddTaskBarState extends State<AddTaskBar> {
           );
 
         }
+  }
+
+  _addEventToDb() async{
+   int value = await _eventController.addEvent(
+        event: Event(
+          note: _noteController.text,
+          title: _titleController.text,
+          date: DateFormat.yMd().format(_selectedDate),
+          starTime: _starTime,
+          endTime: _endTime,
+          remind: _selectedRemind,
+          repeat: _selectedRepeat,
+          color: _selectedColor,
+          isConpleted: 0,
+        )
+    );
+   // print("my event"+"$value" );
   }
 
   _colorPalete() {
@@ -240,7 +260,7 @@ class _AddTaskBarState extends State<AddTaskBar> {
           print(_selectedDate);
         });
       }else{
-      print('something is erro');
+
     }
   }
   _getTimeFromUser({required bool isStarTime}) async{
@@ -248,9 +268,6 @@ class _AddTaskBarState extends State<AddTaskBar> {
       if(pickerTime != null)
         {
           String _formatedTime = pickerTime.format(context); // Định dạng thời gian
-          print('Selected time: $_formatedTime'); // In thời gian đã chọn
-          print('time out');
-
           if (isStarTime) {
             setState(() {
               _starTime = _formatedTime; // Cập nhật thời gian bắt đầu
@@ -261,7 +278,7 @@ class _AddTaskBarState extends State<AddTaskBar> {
             });
           }
         } else {
-        print('No time selected'); // Nếu không có thời gian nào được chọn
+       // Nếu không có thời gian nào được chọn
       }
   }
   _showTimePiker() async{

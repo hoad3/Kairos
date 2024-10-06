@@ -7,10 +7,16 @@ plugins {
 
 android {
     namespace = "com.example.kairos"
-    compileSdk = flutter.compileSdkVersion
+    //compileSdk = flut   ter.compileSdkVersion
+    compileSdk = 34 // Đặt phiên bản SDK tại đây (hoặc phiên bản cao hơn nếu cần)
     ndkVersion = flutter.ndkVersion
     defaultConfig {
         multiDexEnabled true
+        applicationId = "com.example.kairos"
+        minSdk = 21 // Đặt giá trị tối thiểu cho SDK (có thể điều chỉnh theo nhu cầu)
+        targetSdk = 34 // Đặt phiên bản SDK mục tiêu
+        versionCode = 1 // Thay đổi phiên bản code
+        versionName = "1.0" // Thay đổi phiên bản name
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
